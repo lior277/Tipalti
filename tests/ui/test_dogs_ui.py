@@ -1,22 +1,31 @@
-import pytest
 from models.form_data import FormData
 
 
-def test_dog_menu_flow(driver, config, menu_items, menu_page, contact_page):
-    for dog in menu_items:
-        driver.open(config.base_url)
+def test_dog_contact_form_submission(driver, config, menu_page, contact_page):
+    driver.open(config.base_url)
 
+    menu_page.open_menu()
+    all_menu_items = menu_page.get_menu_items()
+
+    dog_names = [item for item in all_menu_items if item.lower() != "home"]
+
+    for dog_name in dog_names:
+        driver.open(config.base_url)
         menu_page.open_menu()
 
-        assert dog in menu_items, f"{dog} not found in menu"
+        menu_items = menu_page.get_menu_items()
 
-        menu_page.click_menu_item(dog)
+        assert menu_page.validate_menu_item_exists(dog_name, menu_items), \
+            f"Dog '{dog_name}' not found in menu"
 
-        form_data = FormData(
+        menu_page.click_menu_item(dog_name)
+
+        unique_message = f"I'm interested in {dog_name}! Please tell me more about {dog_name}."
+
+        contact_page.fill_contact_details(
             name=config.contact_name,
             email=config.contact_email,
-            message=config.contact_message_template.format(dog=dog)
+            message=unique_message
         )
 
-        contact_page.fill_form(form_data)
-        contact_page.send()
+        contact_page.send_details()
