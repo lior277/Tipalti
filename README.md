@@ -1,196 +1,272 @@
-Tipalti QA Assignment – Automation + Manual Test Plan
+# Tipalti QA Automation Framework
 
-Badges: Python 3.12 · Pytest · Playwright · POM · SOLID
+![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)
+![Pytest](https://img.shields.io/badge/Pytest-Framework-green?logo=pytest)
+![Playwright](https://img.shields.io/badge/Playwright-UI%20Testing-orange?logo=playwright)
+![POM](https://img.shields.io/badge/Pattern-Page%20Object%20Model-purple)
+![SOLID](https://img.shields.io/badge/Principles-SOLID-red)
 
-This project implements UI automation for the Tipalti dog-site assignment using Python + Pytest + Playwright.
-The framework dynamically extracts menu items, navigates to each dog page, fills the contact form, and submits it.
-A full manual test plan is included at the end.
+A robust test automation framework built with Python, Pytest, and Playwright for the Tipalti QA assignment. The framework implements clean architecture principles with Page Object Model (POM) design pattern and SOLID principles.
 
-Project Structure
+## Features
+
+- **Dynamic Test Execution**: Automatically extracts menu items and executes tests dynamically
+- **Page Object Model**: Clean separation of concerns with reusable page objects
+- **Configuration Management**: Centralized JSON-based configuration
+- **SOLID Principles**: Maintainable and extensible code structure
+- **HTTP Client**: Reusable HTTP client with retry logic for API testing
+- **Comprehensive Logging**: Built-in logging utilities for debugging
+- **Cross-browser Support**: Playwright-based execution across multiple browsers
+
+## Project Structure
+
+```
 Tipalti/
 │
 ├── config/
-│   └── config.json
+│   ├── __init__.py
+│   ├── config.json              # Test configuration
+│   └── config_manager.py        # Configuration loader
 │
 ├── core/
-│   ├── ui_driver.py
-│   └── ui_element.py
+│   ├── __init__.py
+│   ├── http_client.py           # HTTP client with retry logic
+│   ├── ui_driver.py             # UI driver wrapper
+│   └── ui_element.py            # UI element wrapper
 │
 ├── pages/
-│   ├── menu_page.py
-│   └── contact_page.py
+│   ├── __init__.py
+│   ├── base_page.py             # Base page class
+│   ├── menu_page.py             # Menu page object
+│   └── contact_page.py          # Contact form page object
 │
 ├── tests/
+│   ├── __init__.py
+│   ├── conftest.py              # Pytest fixtures
 │   └── ui/
-│       └── test_dogs_ui.py
+│       ├── __init__.py
+│       └── test_dogs_ui.py      # UI test cases
 │
-└── README.md
+├── utilities/
+│   ├── __init__.py
+│   ├── helpers.py               # Helper functions
+│   └── logger.py                # Logging configuration
+│
+├── .gitignore
+├── README.md
+└── requirements.txt
+```
 
-Installation
+## Installation
 
-Create virtual environment
+### Prerequisites
 
-python -m venv .venv
+- Python 3.12 or higher
+- pip package manager
 
+### Setup
 
-Activate (Windows)
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/lior277/Tipalti.git
+   cd Tipalti
+   ```
 
-.venv\Scripts\activate
+2. **Create and activate virtual environment**
+   
+   **Windows:**
+   ```bash
+   python -m venv .venv
+   .venv\Scripts\activate
+   ```
+   
+   **macOS/Linux:**
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
 
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-Install dependencies
+4. **Install Playwright browsers**
+   ```bash
+   playwright install chromium
+   ```
 
-pip install -r requirements.txt
+## Running Tests
 
-Running Tests
+### Run all tests
+```bash
 pytest -v
+```
 
-Automation Flow (Dog Menu UI Test)
+### Run specific test file
+```bash
+pytest tests/ui/test_dogs_ui.py -v
+```
 
-The automation dynamically reads menu items from the DOM and executes the full workflow for each dog page.
+### Run with HTML report
+```bash
+pytest --html=reports/report.html --self-contained-html
+```
 
-Automation Steps
+### Run in headless mode
+Modify `tests/conftest.py` and change `headless=False` to `headless=True` in the browser fixture.
 
-Open homepage
+## Test Flow
 
-Click hamburger menu
+The automated test performs the following workflow for each dog page:
 
-Extract menu items dynamically
+1. **Navigate** to the homepage
+2. **Open** the hamburger menu
+3. **Extract** menu items dynamically from the DOM
+4. **Validate** each menu option exists
+5. **Navigate** to each dog page (Kika, Lychee, Kimba)
+6. **Fill** contact form with:
+   - Name (from config)
+   - Email (from config)
+   - Dynamic message containing the dog's name
+7. **Submit** the form
+8. **Verify** error page loads (expected behavior)
 
-Validate each menu option exists
-
-Navigate to each selected dog page
-
-Fill contact form fields: Name, Email, Message
-
-Insert dynamic message containing the dog name
-
-Submit the form and verify the error page loads (expected behavior)
-
-Dynamic Message Example:
+### Example Dynamic Message
+```
 This is a message for Kika!
+```
 
-Key Automation Files
-test_dogs_ui.py
+## Configuration
 
-Loops through dynamically extracted menu items
+Edit `config/config.json` to customize test data:
 
-Performs the entire workflow for each dog
+```json
+{
+  "base_url": "https://qa-tipalti-assignment.tipalti-pg.com/index.html",
+  "contact_form": {
+    "name": "Test User",
+    "email": "test@example.com",
+    "message_template": "This is a message for {dog}!"
+  }
+}
+```
 
-Uses clean Page Object Model (POM) methods
+## Framework Architecture
 
-menu_page.py
+### Core Components
 
-Opens hamburger menu
+**UIDriver** (`core/ui_driver.py`)
+- Provides clean UI interaction interface
+- Wraps Playwright page object
+- Single Responsibility Principle (SRP)
 
-Reads menu items
+**UIElement** (`core/ui_element.py`)
+- Encapsulates element interactions
+- Provides fluent API for common actions
 
-Clicks the target menu button
+**ConfigManager** (`config/config_manager.py`)
+- Loads and provides access to test configuration
+- Centralized configuration management
 
-contact_page.py
+**HttpClient** (`core/http_client.py`)
+- Reusable HTTP client with automatic retry logic
+- Configurable timeouts and retry strategies
+- Dependency Inversion Principle (DIP)
 
-Fills Name, Email, Message fields
+### Page Objects
 
-Submits the form
+**MenuPage** (`pages/menu_page.py`)
+- Opens hamburger menu
+- Retrieves menu items dynamically
+- Navigates to specific menu items
 
-config.json
+**ContactPage** (`pages/contact_page.py`)
+- Fills contact form fields
+- Submits form
+- Validates form availability
 
-Stores:
+## Manual Test Plan
 
-base_url
+### 1. Navigation Tests
 
-contact form: name, email, message template
+#### 1.1 Menu opens correctly
+- Click hamburger → menu expands
 
-Manual Test Plan
-Navigation Tests
+#### 1.2 Menu items visible
+Expected items: Home, Kika, Lychee, Kimba  
+Verify:  
+- Items appear  
+- Items clickable  
+- No broken links  
 
-1.1 Menu opens correctly
+#### 1.3 Navigation works
+- Each item loads correct page  
+- Header + dog name displayed  
 
-Click hamburger icon → menu expands
+---
 
-1.2 Menu items visible
-Expected items: Home, Kika, Lychee, Kimba
-Verify:
+### 2. Contact Form Tests
 
-Items are clickable
+#### 2.1 Valid input
+- Fill Name, Email, Message → Send  
+Expected: Error page loads  
 
-No broken links
+#### 2.2 Empty fields
+- Submit empty form  
+Expected: Browser validation blocks submit  
 
-1.3 Navigation
+#### 2.3 Invalid email
+- Enter "abc"  
+Expected: Email-format validation error  
 
-Selecting each item loads the correct dog page
+#### 2.4 Long message
+- Paste long text  
+Expected: Accepted, layout stable  
 
-Header + dog name displayed correctly
+---
 
-Contact Form Tests
+### 3. UI & Layout Tests
 
-2.1 Valid input
+#### 3.1 Responsive menu
+- Menu opens/closes correctly at >1024px width  
 
-Fill Name, Email, Message → Send
+#### 3.2 Page elements
+- Dog image loads  
+- Title + text visible  
+- Footer visible  
 
-Expected: Redirects to error page
+---
 
-2.2 Empty fields
+## Critical Tests (Must Run Before Deployment)
 
-Try to submit empty form
+### Navigation
+- Menu opens  
+- All menu items appear  
+- Each item loads correct page  
 
-Expected: Browser validation prevents submit
+### Form
+- All fields visible  
+- Can type into each field  
+- Submit button works  
+- Error page appears
 
-2.3 Invalid email
+## Contributing
 
-Enter "abc"
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-Expected: Email-format validation error
+## License
 
-2.4 Long message
+This project is part of a QA assignment for Tipalti.
 
-Paste long text
+## Contact
 
-Expected: Field accepts content without layout break
+Repository: [https://github.com/lior277/Tipalti](https://github.com/lior277/Tipalti)
 
-UI & Layout Tests
+---
 
-3.1 Responsive menu
-
-Menu should open/close correctly in desktop viewport
-
-3.2 Page elements
-
-Dog image loads
-
-Title, text, and footer visible
-
-Critical Tests (Must Run Before Deployment)
-Navigation
-
-Menu opens
-
-All menu items visible
-
-Each menu item loads correct dog page
-
-Form
-
-All fields visible
-
-Able to type into Name, Email, Message
-
-Submit button works
-
-Error page appears after submission
-
-Summary
-
-This README includes:
-
-Project explanation
-
-Installation instructions
-
-Test execution guide
-
-Automation flow breakdown
-
-Manual test plan
-
-Critical deployment checks
+**Built with ❤️ using Python, Pytest, and Playwright**
