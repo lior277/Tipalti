@@ -2,7 +2,6 @@ from core.ui_element import UIElement
 
 
 class UIDriver:
-    """SRP: Provides UI actions. No test logic."""
     def __init__(self, page):
         self.page = page
 
@@ -11,3 +10,6 @@ class UIDriver:
 
     def element(self, selector: str):
         return UIElement(self.page.locator(selector))
+
+    def element_by_text(self, selector: str, text: str):
+        return UIElement(self.page.locator(selector, has_text=text).first)

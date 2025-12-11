@@ -3,7 +3,9 @@ from playwright.sync_api import sync_playwright, ViewportSize
 
 from core.ui_driver import UIDriver
 from config.config_manager import ConfigManager
+from services.menu_validator import MenuValidator
 from pages.menu_page import MenuPage
+from pages.contact_page import ContactPage
 
 
 @pytest.fixture(scope="session")
@@ -24,27 +26,29 @@ def driver(browser, config):
     viewport = ViewportSize(width=1920, height=1080)
     page = browser.new_page(viewport=viewport)
     driver = UIDriver(page)
-    page.goto(config.base_url)
 
     yield driver
     page.close()
 
 
+@pytest.fixture()
+def menu_page(driver):
+    return MenuPage(driver)
+
+
+@pytest.fixture()
+def contact_page(driver):
+    return ContactPage(driver)
+
+
 @pytest.fixture(scope="session")
 def menu_items(browser, config):
-    page = browser.new_page()
-    page.goto(config.base_url)
+    viewport = ViewportSize(width=1920, height=1080)
+    page = browser.new_page(viewport=viewport)
     driver = UIDriver(page)
-    menu = MenuPage(driver)
-    menu.open_menu()
-    all_items = menu.get_menu_items()
-    valid = []
 
-    for item in all_items:
-        page.goto(f"{config.base_url.replace('index.html', '')}{item.lower()}.html")
-
-        if page.locator("#name").count() > 0:
-            valid.append(item)
+    validator = MenuValidator(driver, config)
+    items = validator.get_valid_menu_items()
 
     page.close()
-    return valid
+    return items

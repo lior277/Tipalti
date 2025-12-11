@@ -1,5 +1,4 @@
-# pages/base_page.py
-class BasePage:
+class PageHelper:
     def __init__(self, driver):
         self.driver = driver
 
@@ -14,3 +13,9 @@ class BasePage:
 
     def wait_for_load(self):
         self.driver.page.wait_for_load_state("domcontentloaded")
+
+    def refresh(self):
+        self.driver.page.reload()
+
+    def go_back(self):
+        self.driver.page.go_back()

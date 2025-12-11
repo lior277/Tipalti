@@ -1,20 +1,29 @@
-from core.ui_element import UIElement
+from pages.page_helper import PageHelper
+from models.form_data import FormData
+
 
 class ContactPage:
     def __init__(self, driver):
         self.driver = driver
-        self.name_input = driver.element("#name")
-        self.email_input = driver.element("#email")
-        self.message_input = driver.element("#message")
-        self.send_button = driver.element("input[type='submit']")
+        self.helper = PageHelper(driver)
+        self.name_selector = "#name"
+        self.email_selector = "#email"
+        self.message_selector = "#message"
+        self.submit_selector = "input[type='submit']"
+
+    def open(self, url: str):
+        self.helper.open(url)
+
+    def get_title(self) -> str:
+        return self.helper.get_title()
 
     def is_form_available(self) -> bool:
-        return self.driver.page.locator("#name").count() > 0
+        return self.driver.page.locator(self.name_selector).count() > 0
 
-    def fill_form(self, name: str, email: str, message: str):
-        self.name_input.fill(name)
-        self.email_input.fill(email)
-        self.message_input.fill(message)
+    def fill_form(self, data: FormData):
+        self.driver.element(self.name_selector).fill(data.name)
+        self.driver.element(self.email_selector).fill(data.email)
+        self.driver.element(self.message_selector).fill(data.message)
 
     def send(self):
-        self.send_button.click()
+        self.driver.element(self.submit_selector).click()
