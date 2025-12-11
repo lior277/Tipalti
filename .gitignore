@@ -1,0 +1,69 @@
+# -------------------------------
+# Python general
+# -------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pytest_cache/
+*.DS_Store
+*.egg-info/
+*.egg
+*.log
+
+# -------------------------------
+# Virtual environments
+# -------------------------------
+venv/
+.venv/
+ENV/
+env/
+env.bak/
+
+# -------------------------------
+# IDE / Editors
+# -------------------------------
+.idea/
+.vscode/
+*.swp
+
+# -------------------------------
+# Playwright
+# -------------------------------
+playwright-report/
+test-results/
+test-results/*
+playwright/.cache/
+
+# Artifacts (screenshots, traces, videos)
+screenshots/
+videos/
+traces/
+
+# -------------------------------
+# Pytest HTML reports
+# -------------------------------
+reports/
+report.html
+htmlcov/
+
+# -------------------------------
+# OS specific
+# -------------------------------
+Thumbs.db
+.DS_Store
+
+# -------------------------------
+# Config / Secrets (Optional)
+# -------------------------------
+*.env
+.env.*
+config/*.local.json
+
+# -------------------------------
+# Coverage / Build
+# -------------------------------
+.coverage
+coverage.xml
+dist/
+build/

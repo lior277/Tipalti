@@ -1,0 +1,9 @@
+{
+  "base_url": "https://qa-tipalti-assignment.tipalti-pg.com/index.html",
+
+  "contact_form": {
+    "name": "Test User",
+    "email": "test@example.com",
+    "message_template": "This is a message for {dog}!"
+  }
+}
