@@ -4,18 +4,20 @@
 ![Pytest](https://img.shields.io/badge/Pytest-Framework-green?logo=pytest)
 ![Playwright](https://img.shields.io/badge/Playwright-UI%20Testing-orange?logo=playwright)
 ![POM](https://img.shields.io/badge/Pattern-Page%20Object%20Model-purple)
-![SOLID](https://img.shields.io/badge/Principles-SOLID-red)
+![Composition](https://img.shields.io/badge/Design-Composition-red)
 
-A robust test automation framework built with Python, Pytest, and Playwright for the Tipalti QA assignment. The framework implements clean architecture principles with Page Object Model (POM) design pattern and SOLID principles.
+A robust test automation framework built with Python, Pytest, and Playwright for the Tipalti QA assignment. The framework implements clean architecture principles with Page Object Model (POM) design pattern and composition over inheritance.
 
 ## Features
 
 - **Dynamic Test Execution**: Automatically extracts menu items and executes tests dynamically
 - **Page Object Model**: Clean separation of concerns with reusable page objects
+- **Composition Pattern**: Flexible design using composition over inheritance
+- **Service Layer**: MenuValidator service for business logic separation
+- **Type Safety**: FormData model for type-safe form submissions
+- **Page Fixtures**: Centralized page object creation via pytest fixtures
 - **Configuration Management**: Centralized JSON-based configuration
-- **SOLID Principles**: Maintainable and extensible code structure
-- **HTTP Client**: Reusable HTTP client with retry logic for API testing
-- **Comprehensive Logging**: Built-in logging utilities for debugging
+- **Auto-Waiting**: Leverages Playwright's built-in auto-waiting capabilities
 - **Cross-browser Support**: Playwright-based execution across multiple browsers
 
 ## Project Structure
@@ -36,9 +38,17 @@ Tipalti/
 │
 ├── pages/
 │   ├── __init__.py
-│   ├── base_page.py             # Base page class
+│   ├── page_helper.py           # Common page operations (composition)
 │   ├── menu_page.py             # Menu page object
 │   └── contact_page.py          # Contact form page object
+│
+├── models/
+│   ├── __init__.py
+│   └── form_data.py             # Form data model
+│
+├── services/
+│   ├── __init__.py
+│   └── menu_validator.py        # Menu validation service
 │
 ├── tests/
 │   ├── __init__.py
@@ -154,25 +164,54 @@ Edit `config/config.json` to customize test data:
 
 ## Framework Architecture
 
+### Design Principles
+
+**Composition Over Inheritance**
+- Pages use `PageHelper` via composition instead of inheriting from `BasePage`
+- Provides loose coupling and greater flexibility
+- Easy to test and maintain
+
+**Service Layer**
+- `MenuValidator` service handles business logic
+- Separates concerns from test fixtures
+- Reusable and testable independently
+
+**Type Safety**
+- `FormData` model ensures type-safe form submissions
+- Prevents errors from passing incorrect parameters
+
+**Page Fixtures**
+- Centralized page object creation
+- Clean test code without manual instantiation
+- Easy to add common setup logic
+
 ### Core Components
 
 **UIDriver** (`core/ui_driver.py`)
 - Provides clean UI interaction interface
 - Wraps Playwright page object
-- Single Responsibility Principle (SRP)
+- Methods: `element()`, `element_by_text()`, `open()`
 
 **UIElement** (`core/ui_element.py`)
 - Encapsulates element interactions
 - Provides fluent API for common actions
+- Leverages Playwright's auto-waiting
 
 **ConfigManager** (`config/config_manager.py`)
 - Loads and provides access to test configuration
 - Centralized configuration management
 
-**HttpClient** (`core/http_client.py`)
-- Reusable HTTP client with automatic retry logic
-- Configurable timeouts and retry strategies
-- Dependency Inversion Principle (DIP)
+**PageHelper** (`pages/page_helper.py`)
+- Common page operations via composition
+- Methods: `open()`, `get_title()`, `get_url()`, `wait_for_load()`
+
+**FormData** (`models/form_data.py`)
+- Type-safe data model for contact forms
+- Single object instead of multiple parameters
+
+**MenuValidator** (`services/menu_validator.py`)
+- Validates which menu items have contact forms
+- Separates business logic from test fixtures
 
 ### Page Objects
 
@@ -180,11 +219,59 @@ Edit `config/config.json` to customize test data:
 - Opens hamburger menu
 - Retrieves menu items dynamically
 - Navigates to specific menu items
+- Uses PageHelper via composition
 
 **ContactPage** (`pages/contact_page.py`)
-- Fills contact form fields
+- Fills contact form fields using FormData
 - Submits form
 - Validates form availability
+- Uses PageHelper via composition
+
+## Code Examples
+
+### Using Page Fixtures
+
+```python
+def test_dog_menu_flow(driver, config, menu_items, menu_page, contact_page):
+    for dog in menu_items:
+        driver.open(config.base_url)
+        
+        menu_page.open_menu()
+        menu_page.click_menu_item(dog)
+        
+        form_data = FormData(
+            name=config.contact_name,
+            email=config.contact_email,
+            message=config.contact_message_template.format(dog=dog)
+        )
+        
+        contact_page.fill_form(form_data)
+        contact_page.send()
+```
+
+### Page Helper Composition
+
+```python
+class MenuPage:
+    def __init__(self, driver):
+        self.driver = driver
+        self.helper = PageHelper(driver)  # Composition
+    
+    def open(self, url: str):
+        self.helper.open(url)  # Delegate to helper
+```
+
+### Type-Safe Form Data
+
+```python
+form_data = FormData(
+    name="John Doe",
+    email="john@example.com",
+    message="Hello World!"
+)
+
+contact_page.fill_form(form_data)
+```
 
 ## Manual Test Plan
 
