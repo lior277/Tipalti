@@ -1,11 +1,13 @@
 from playwright.sync_api import Page
+
 from core.ui_element import UIElement
+from config.config_manager import ConfigManager
 
 
 class UIDriver:
-    def __init__(self, page: Page, timeout: int = 5000):
+    def __init__(self, page: Page, config: ConfigManager):
         self.page = page
-        self.timeout = timeout
+        self.timeout = config.ui_timeout_ms
 
     # ---------- navigation ----------
     def open(self, url: str) -> None:
@@ -19,21 +21,25 @@ class UIDriver:
             timeout=self.timeout
         )
 
-    def by_css_text(self, selector: str, text: str) -> UIElement:
+    def by_text(self, text: str, *, exact: bool = True) -> UIElement:
         return UIElement(
-            locator=self.page.locator(selector).get_by_text(text),
+            locator=self.page.get_by_text(text, exact=exact),
             timeout=self.timeout
         )
 
-    def by_text(self, text: str) -> UIElement:
+    def by_role(
+        self,
+        role: str,
+        *,
+        name: str | None = None,
+        exact: bool = True
+    ) -> UIElement:
         return UIElement(
-            locator=self.page.get_by_text(text),
-            timeout=self.timeout
-        )
-
-    def by_role(self, role: str, name: str | None = None) -> UIElement:
-        return UIElement(
-            locator=self.page.get_by_role(role, name=name),
+            locator=self.page.get_by_role(  # type: ignore[arg-type]
+                role,
+                name=name,
+                exact=exact
+            ),
             timeout=self.timeout
         )
 

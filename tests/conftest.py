@@ -1,4 +1,6 @@
 import os
+from typing import Generator
+
 import pytest
 from playwright.sync_api import sync_playwright, ViewportSize
 
@@ -9,7 +11,7 @@ from pages.contact_page import ContactPage
 
 
 @pytest.fixture(scope="session")
-def config():
+def config() -> ConfigManager:
     return ConfigManager()
 
 
@@ -23,21 +25,31 @@ def browser():
         browser.close()
 
 
-@pytest.fixture()
-def driver(browser):
+@pytest.fixture
+def driver(browser, config: ConfigManager) -> Generator[UIDriver, None, None]:
     page = browser.new_page(
         viewport=ViewportSize(width=1920, height=1080)
     )
-    driver = UIDriver(page)
+    driver = UIDriver(page, config)
+    driver.open(config.base_url)
     yield driver
     page.close()
 
 
-@pytest.fixture()
-def menu_page(driver):
+@pytest.fixture
+def menu_page(driver: UIDriver) -> MenuPage:
     return MenuPage(driver)
 
 
-@pytest.fixture()
-def contact_page(driver):
+@pytest.fixture
+def contact_page(driver: UIDriver) -> ContactPage:
     return ContactPage(driver)
+
+
+@pytest.fixture
+def contact_data():
+    return {
+        "name": "Test User",
+        "email": "test@example.com",
+        "message": "This is a message for Buddy!"
+    }
