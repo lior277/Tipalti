@@ -1,21 +1,31 @@
-# core/ui_element.py
-from playwright.sync_api import Locator
+from dataclasses import dataclass
+from playwright.sync_api import Locator, TimeoutError
 
+
+@dataclass(frozen=True)
 class UIElement:
-    def __init__(self, locator: Locator):
-        self.locator = locator
+    locator: Locator
+    timeout: int = 5000
 
-    def click(self):
+    def _wait_visible(self) -> None:
+        self.locator.wait_for(state="visible", timeout=self.timeout)
+
+    def click(self) -> None:
+        self._wait_visible()
+        self.locator.scroll_into_view_if_needed()
         self.locator.click()
 
-    def fill(self, value: str):
+    def fill(self, value: str) -> None:
+        self._wait_visible()
         self.locator.fill(value)
 
     def text(self) -> str:
-        return self.locator.text_content()
+        self._wait_visible()
+        return self.locator.inner_text().strip()
 
-    def all_texts(self):
-        return self.locator.all_text_contents()
-
-    def locator_obj(self):
-        return self.locator
+    def is_visible(self) -> bool:
+        try:
+            self._wait_visible()
+            return True
+        except TimeoutError:
+            return False

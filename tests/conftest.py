@@ -1,3 +1,4 @@
+import os
 import pytest
 from playwright.sync_api import sync_playwright, ViewportSize
 
@@ -15,17 +16,19 @@ def config():
 @pytest.fixture(scope="session")
 def browser():
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(
+            headless=os.getenv("CI") is not None
+        )
         yield browser
         browser.close()
 
 
 @pytest.fixture()
 def driver(browser):
-    viewport = ViewportSize(width=1920, height=1080)
-    page = browser.new_page(viewport=viewport)
+    page = browser.new_page(
+        viewport=ViewportSize(width=1920, height=1080)
+    )
     driver = UIDriver(page)
-
     yield driver
     page.close()
 
